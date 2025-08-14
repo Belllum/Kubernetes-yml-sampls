@@ -1,0 +1,126 @@
+Docker
+
+https://get.docker.com/ - install script for docker
+
+sudo usermod -aG docker <user> 
+	to enable the user to use docker
+
+
+Docker run
+
+docker ps
+	-a 
+		display all containers running or not
+docker run
+	—name 
+		designate a name for a container
+			Sample_name
+	-p 
+		designate a port for the container 
+			80:80
+	-d 
+		detached mode
+	-i 
+		interactive mode
+	-t 
+		psuedo terminal
+	-v
+		mount a volume (bind a host directory or named volume to a container path).
+			hostdir:containerdir
+	-u
+		run the container as a specific user.
+			root
+			1000:1000 - userid and groupid
+	-e 
+		env
+			APP_COLOR=blue
+			MYSQL_ROOT_PASSWORD=db_pass123
+	—entrypoint
+		change/set an entry point on a container
+	—network
+		network type
+		none, bridge, host
+	—cpus
+		=0.5
+	—memories
+		=100m
+	—mount - remember to separate it using ,
+		type= bind or volume
+		source=/hostdir/ or vol
+		target=/containerdir/
+docker images
+docker pull
+docker attach - go back to the running container
+docker stop
+docker rm
+docker rmi
+docker cp
+docker commit - create an image using a container
+	container image:tag
+
+Docker Images
+Dockerfile
+	FROM
+	RUN
+	COPY
+	ENTRYPOINT
+
+Docker build
+	-t
+		tag
+Docker push
+Docker login
+Docker Compose
+
+￼
+
+docker run -d --name mysql-db -e MYSQL_ROOT_PASSWORD=db_pass123 mysql
+
+docker network ls
+docker network create 
+docker network create --driver bridge --subnet 182.18.0.0/24 --gateway 182.18.0.1 wp-mysql-network
+docker service create  —replicas 2 —network wp-mysql-network nginx
+docker push
+docker pull
+docker login
+
+docker service create
+	—replicas=number
+docker service update
+docker service ls
+docker service ps
+
+docker info
+docker history
+docker system df -v
+
+
+docker swarm init
+docker swarm init —advertise-addr <ip-add>
+docker swarm init —force-new-cluster
+docker swarm join —token <token> <id-add of the master>
+docker swarm join-token worker
+docker swarm join-token manager
+docker swarm leave
+docker node promote <hostname>
+docker node ls
+docker node update —availability drain <Node>
+docker node rm <hostname>
+
+docker stack deploy <docker stack name> —compose-file <docker.yml file>  
+
+docker save -o /tmp/apps_devops.tar apps:devops - make image into a tar file
+
+docker load -i /tmp/apps_devops.tar - pull tar file to be an image
+
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+￼
