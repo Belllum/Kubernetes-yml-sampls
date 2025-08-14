@@ -1,0 +1,49 @@
+Cluster Maintenance - OS Upgrades
+
+k drain <node-name>
+
+k cordon <node-name>
+
+k uncordon <node-name>
+
+kubectl drain node01 --ignore-daemonsets
+
+kubeadm upgrade plan
+
+kubeadm upgrade apply v1.12.0
+
+apt-get upgrade -y kubeadm=1.12.0-00
+
+systemctl restart kubelet
+
+
+
+vim /etc/apt/sources.list.d/kubernetes.list
+	deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /
+
+apt update
+
+apt-cache madison kubeadm
+
+apt-get install kubeadm=1.33.0-1.1
+
+kubeadm upgrade plan v1.33.0
+
+kubeadm upgrade apply v1.33.0
+
+apt-get install kubelet=1.33.0-1.1
+
+systemctl daemon-reload
+
+systemctl restart kubelet 
+
+
+ETCDCTL
+
+etcdctl --endpoints=https://[127.0.0.1]:2379 \
+--cacert=/etc/kubernetes/pki/etcd/ca.crt \
+--cert=/etc/kubernetes/pki/etcd/server.crt \
+--key=/etc/kubernetes/pki/etcd/server.key \
+snapshot save /opt/snapshot-pre-boot.db
+
+etcdutl snapshot restore /opt/snapshot-pre-boot.db --data-dir /var/lib/etcd-from-backup

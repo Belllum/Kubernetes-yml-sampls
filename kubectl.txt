@@ -1,0 +1,113 @@
+Kubectl
+
+kubectl run nginx --image=nginx
+
+kubectl create - create config
+
+kubectl create -f <pod-yml> - create pod using yml file
+
+kubectl get pods
+
+kubectl get pods -o wide - check for nodes
+
+kubectl run redis --image=redis123 --dry-run=client -o yaml > redis-definition.yaml 
+	create a yml file using kubectl run
+
+kubectl describe pod <pod-name>
+
+kubectl edit pod <pod-name>
+
+kubectl get replicaset
+
+kubectl delete replicaset <replicaset-name>
+
+kubectl replace -f <replicaset-yml>
+
+kubectl get deployments
+
+kubectl get all
+
+kubectl create deployment --image httpd:2.4-alpine --replicas=3  httpd-frontend
+
+kubectl expose pod redis --port=6379 --name=redis-service --type=ClusterIP
+
+kubectl create deployment webapp --image=kodekloud/webapp-color --replicas=3
+
+kubectl run custom-nginx --image nginx --port 8080
+
+kubectl create namespace dev-ns
+
+ kubectl create deployment redis-deploy --image redis --namespace dev-ns --replicas 2
+
+kubectl run httpd --image=httpd:alpine --port=80 --expose
+
+kubectl get all --selector env=prod
+
+kubectl get pods --selector env=prod,bu=finance,tier=frontend
+
+kubectl describe node <nodename> | grep Taint
+
+untaint
+kubectl taint nodes controlplane node-role.kubernetes.io/control-plane:NoSchedule-
+
+kubectl label nodes <nodename> <key>=<value>
+
+kubectl get pod webapp -o yaml >&nbsp;my-new-pod.yaml
+
+kubectl run --restart=Never --image=busybox static-busybox --dry-run=client -o yaml --command -- sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
+
+kubectl get priorityclass
+
+kubectl get pods -o custom-columns="NAME:.metadata.name,PRIORITY:.spec.priorityClassName"
+
+kube-apiserver -h | grep enable-admission-plugins
+kubedm setup   -	kubectl exec kube-apiservice-controlplane -n kube-system -- kube-apiserver -h | grep enable-admission-plugins
+				kubectl exec -it kube-apiserver-controlplane -n kube-system -- kube-apiserver -h | grep 'enable-admission-plugins'
+				ps -ef | grep kube-apiserver | grep admission-plugins
+
+kube-apiserver.service
+kubeadm setup - /etc/kubernetes/manifest/kube-apiserver.yml
+
+kubectl get pvc myclaim -o yaml
+
+
+
+
+￼
+
+
+install etcd
+curl -L https://github.com/etcd-io/etcd/releases/download/v3.3.11/etcd-v3.3.11-linux-amd64.tar.gz -o etcd-v3.3.11-linux-amd64.tar.gz
+
+connect to the etcd pod running on the kube master
+kubectl exec etcd-controlplane -n kube-system -- sh -c "ETCDCTL_API=3 etcdctl get / \
+  --prefix --keys-only --limit=10 / \
+  --cacert /etc/kubernetes/pki/etcd/ca.crt \
+  --cert /etc/kubernetes/pki/etcd/server.crt \
+  --key /etc/kubernetes/pki/etcd/server.key"
+
+install kube controller manager
+wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kube-controller-manager
+
+install kube scheduler
+wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kube-scheduler
+
+install kubelet
+wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kubelet
+
+install kube proxy
+wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kube-proxy
+
+
+service cluster IP - need clarification
+
+￼
+￼
+
+kubectl expose pod redis --port=6379 --name=redis-service --type=ClusterIP
+
+
+￼
+
+
+/var/lib/kubelet/config.yaml — node config file for kube

@@ -1,0 +1,153 @@
+ALM - Commands and Arguments in Docker 
+
+docker run ubuntu
+
+docker ps
+
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu-sleeper-pod
+spec:
+  containers:
+    - name: ubuntu-sleeper
+      image: ubuntu-sleeper		#pre-created image
+      command: ["sleep2.0"]		#entrypoint
+      args: ["10"]				#CMD
+
+
+kubectl create configmap
+
+kubectl create configmap app-config --from-literal=APP_COLOR=blue --from-literal=APP_MOD=prod
+
+kubectl create configmap app-config --from-file=app_config.properties
+
+kubectl get configmaps
+
+
+
+kubectl create secret generic app-secret --from-literal=DB_Host=mysql
+
+kubectl create secret generic app-secret \
+  --from-literal=DB_Host=mysql \
+  --from-literal=DB_User=root \
+  --from-literal=DB_Password=paswd
+
+kubectl create secret generic app-secret --from-file=app_secret.properties
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+data:
+  DB_Host: bXlzcWw=
+  DB_User: cm9vdA==
+  DB_Password: cGFzd3Jk
+
+
+echo -n 'mysql' | base64
+echo -n 'root' | base64
+echo -n 'paswrd' | base64
+
+kubectl get secrets
+
+kubectl describe sercet
+
+echo -n 'bXlzcWw=' | base64 --decode
+echo -n 'cm9vdA==' | base64 --decode
+echo -n 'cGFzd3Jk' | base64 --decode
+
+kubectl create secret generic db-secret \
+  --from-literal=DB_Host=sql01 \
+  --from-literal=DB_User=root \
+  --from-literal=DB_Password=password123
+
+
+kubectl get secret --all-namespaces -o json | kubectl replace -f -
+
+apt-get install etcd-client
+
+ETCDCTL_API=3 etcdctl \
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+  --cert=/etc/kubernetes/pki/etcd/server.crt \
+  --key=/etc/kubernetes/pki/etcd/server.key \
+  get /registry/secrets/default/my-secret-2 | hexdump -C
+
+
+
+on /etc/kubernetes/manifests/kube-apiserver.yaml
+
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+    # ... other flags ...
+    - --encryption-provider-config=/etc/kubernetes/enc/enc.yaml
+    volumeMounts:
+      # ... other volume mounts ...
+      - name: enc
+        mountPath: /etc/kubernetes/enc
+        readOnly: true
+  volumes:
+    # ... other volumes ...
+    - name: enc
+      hostPath:
+        path: /etc/kubernetes/enc
+        type: DirectoryOrCreate
+
+https://kubernetes.io/docs/concepts/configuration/secret/
+https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/ 
+
+
+ALM - Multi Container Pod
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simple-webapp
+  labels:
+    name: simple-webapp
+spec:
+  containers:
+    - name: simple-webapp
+      image: simple-webapp
+      ports:
+        - containerPort: 8080
+    - name: log-agent
+      image: log-agent
+
+
+
+k exec app -c app -- cat /log/app.log
+
+k replace --force -f app.yml
+
+
+ALM - VPA Lab
+
+You have recently deployed a Flask application to your Kubernetes cluster. However, the Vertical Pod Autoscaler (VPA) vpa-updater-XXXX pod indicates that there may be an issue with the newly deployed flask-app pods.
+Inspect the logs of the vpa-updater-XXXX pod and observe the following message:
+* Check the logs of the vpa-updater-XXXX pod to identify any potential issues with the flask-app deployment.
+When checking the logs, you see the following error message:
+pods_eviction_restriction.go:226] **too few replicas** for **ReplicaSet** default/**flask-app-b6c9c4f78**
+Problem Analysis:
+* Flask application is running with only 1 replica pod.
+* The Vertical Pod Autoscaler (VPA) needs to evict (remove) the existing pod to create a new one with updated resource settings.
+* Kubernetes has a safety feature that prevents removing the last pod of a deployment to avoid service downtime.
+* When you have only 1 replica and VPA tries to evict it, Kubernetes blocks this action with the error message: "too few replicas".
+* VPA wants to optimize your pod's resources but cannot because Kubernetes is protecting your service availability.
+* As a result, VPA cannot apply its resource recommendations, and application cannot benefit from automatic resource optimization.
+Approach to Resolve the Issue: 1. Increase the replica count:
+kubectl scale deployment flask-app --replicas=2
+2. Verify the Deployment:
+kubectl get deployment flask-app -o wide
+Ensure that the DESIRED column shows the updated replica count, and the CURRENT column matches the desired number.
+3. Check the Pod Status:
+kubectl get pods -l app=flask-app
+Wait until all pods show Running status. You should see two pods (or more) in a Running state.
+4. Verify VPA operation:
+kubectl describe vpa flask-app
+This will show the current state of the VPA and any recommendations it has made. If it's working properly, you should see resource recommendations (for CPU and memory) in the output.
+With 2 replicas, Kubernetes can safely remove one pod while keeping your application running, allowing VPA to work properly.

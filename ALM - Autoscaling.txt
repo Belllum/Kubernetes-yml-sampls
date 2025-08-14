@@ -1,0 +1,136 @@
+ALM - Autoscaling
+
+Horizontal scaling
+Vertical scaling
+
+scaling cluster infra - resources and nodes
+scaling workloads - add pods or add resource limits to pods
+
+Cluster Autoscaler
+HPA - Horizontal Pod Autoscaler
+VPA - Vertical Pod Autoscaler
+
+Manual
+
+k top pod my-app-pod
+
+k scale deployment my-app —replicas=3
+
+kubectl scale --replicas=<number> <workload-type>/<workload-name>
+
+HPA
+
+kubectl autoscale deployment my-app --cpu-percent=50 --min=1 --max=10
+
+kubectl get hpa
+
+kubectl delete hpa my-app
+
+Delarative
+	
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: my-app-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-app
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+
+Inplace Resize Pods Resources
+
+FEATURE_GATES=InPlacePodVerticalScaling=true
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app
+        image: nginx
+        resizePolicy:
+          - resourceName: cpu
+            restartPolicy: NotRequired
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+
+VPA
+
+Manual
+
+k top pod my-app-pod
+
+k edit deployment my-app
+
+Automatic
+
+kubectl apply -f https://github.com/kubernetes/autoscaler/releases/latest/download/vertical-pod-autoscaler.yaml
+
+kubectl get pods -n kube-system | grep vpa
+
+k get vpa -o yaml
+
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: my-app-vpa
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-app
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: "my-app"
+        minAllowed:
+          cpu: "250m"
+        maxAllowed:
+          cpu: "2"
+        controlledResources: ["cpu"]
+
+￼
+
+
+kubectl get crds | grep verticalpodautoscaler
+
+kubectl get deployments -n kube-system | grep vpa
+
+
+Step 1: Install VPA Custom Resource Definitions (CRDs)
+These CRDs allow Kubernetes to recognize the custom resources that VPA uses to function properly. To install them, run this command:
+kubectl apply -f /root/vpa-crds.yml
+Step 2: Install VPA Role-Based Access Control (RBAC)
+RBAC ensures that VPA has the appropriate permissions to operate within your Kubernetes cluster. To install the RBAC settings, run:
+kubectl apply -f /root/vpa-rbac.yml
+By running these commands, the VPA will be successfully deployed to your cluster, ready to manage and adjust your pod resources dynamically.
+
+git clone https://github.com/kubernetes/autoscaler.git
+
+pods_eviction_restriction.go:226] **too few replicas** for **ReplicaSet** default/**flask-app-b6c9c4f78**
